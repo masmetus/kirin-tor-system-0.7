@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
@@ -9,11 +9,13 @@ import Tooltip from 'react-bootstrap/Tooltip';
 
 function App() {
 
-  const startPoints = 10;
-  const totalPoints = 10;
-  const lvl = 10;
+  let startPoints = 10;
+  let totalPoints = 10;
+  let lvl = 10;
+  let n = 0;
 
-  
+  const [usedPoints, setUsedPoints] = useState(0) 
+
 
   const [characheristics, setCharacheristics] = useState([
     {name: 'Интеллект', helper:'Отражение умственных способностей мага: от смекалки до библиотечных знаний. Всё то, что отражает теоретические знания мага. С третьего уровня даёт возможность говорить на других языках, распознавать артефакты.' , value: 1,},
@@ -26,18 +28,37 @@ function App() {
   
 
   function onChange(name, value) {
-    setCharacheristics(
+    let newCharacheristics = 
+    (
       characheristics.map(characteristic => {
     if (characteristic.name == name) 
-      characteristic.value = value;
+      characteristic.value = Number(value);
     return characteristic; 
-  }
+  })
   )
-    )
+  if(totalPoints - calcPoint(newCharacheristics) >= 0) 
+    setCharacheristics(newCharacheristics)
+}
+
+//Сколько из пула очков потратили
+function calcPoint(characheristics){
+  let sum = 0;
+  for(let i = 0; i < characheristics.length; i++){
+    let n=characheristics[i].value;
+    console.log(sum);
+    sum += ((0 + (n-1)*1) / 2) * n
   }
+  return sum;
+}
 
 
-  
+  useEffect(() => {
+    setUsedPoints(calcPoint(characheristics))
+
+  },[characheristics])
+
+
+
   return (
 
     <div className="App">
@@ -64,7 +85,7 @@ function App() {
         </OverlayTrigger>
         </td>
         <td>
-          <input class="form-control text-center" min ="1" max = "10" placeholder = "1" type="number" id="typeNumber"  value={characheristic.value} onChange={e => onChange(characheristic.name, e.target.value) }></input>
+          <input class="form-control text-center" min ="1" max = "10" placeholder = "1" type="number" id="typeNumber"  value={characheristic.value} onChange={e => onChange(characheristic.name, e.target.value)}></input>
         </td>
         <td>
         <p>=</p>
@@ -73,13 +94,13 @@ function App() {
           <input class="form-control text-center" type="text" value={characheristic.value} readonly disabled ></input>
         </td>
         <td>
-          <input class="form-control text-center" type="text" placeholder = "0" readonly disabled></input>
+          <input class="form-control text-center" type="text" value={((0 + (characheristic.value-1)*1) / 2) * characheristic.value} readonly disabled></input>
         </td>
       </tr>))}
       </tbody>
      </table>
      <div id="totalPoints" class="h3 text-end">
-        <p class="text">Пул очков: {totalPoints}</p>
+        <p class="text">Пул очков: {totalPoints - usedPoints}</p>
       </div>
      </div>
      </div>
